@@ -9,8 +9,8 @@ import javax.swing.JOptionPane;
 
 public class RandomFile
 {
-    private RandomAccessFile output;
-    private RandomAccessFile input;
+    public RandomAccessFile output;
+    public RandomAccessFile input;
 
     // Create new file
     public void createFile(String fileName)
@@ -20,7 +20,6 @@ public class RandomFile
         try // open file for reading and writing
         {
             file = new RandomAccessFile(fileName, "rw");
-
         } // end try
         catch (IOException ioException)
         {
@@ -30,16 +29,7 @@ public class RandomFile
 
         finally
         {
-            try
-            {
-                if (file != null)
-                    file.close(); // close file
-            } // end try
-            catch (IOException ioException)
-            {
-                JOptionPane.showMessageDialog(null, "Error closing file!");
-                System.exit(1);
-            } // end catch
+            closeFile(file);
         } // end finally
     } // end createFile
 
@@ -56,20 +46,19 @@ public class RandomFile
         } // end catch
     } // end method openFile
 
-    // Close file for adding or changing records
-    public void closeWriteFile()
+    public void closeFile(RandomAccessFile file)
     {
-        try // close file and exit
+        try
         {
-            if (output != null)
-                output.close();
+            if (file != null)
+                file.close(); // close file
         } // end try
         catch (IOException ioException)
         {
             JOptionPane.showMessageDialog(null, "Error closing file!");
             System.exit(1);
         } // end catch
-    } // end closeFile
+    }
 
     // Add records to file
     public long addRecords(Employee employeeToAdd)
@@ -152,21 +141,6 @@ public class RandomFile
             JOptionPane.showMessageDialog(null, "File is not suported!");
         } // end catch
     } // end method openFile
-
-    // Close file
-    public void closeReadFile()
-    {
-        try // close file and exit
-        {
-            if (input != null)
-                input.close();
-        } // end try
-        catch (IOException ioException)
-        {
-            JOptionPane.showMessageDialog(null, "Error closing file!");
-            System.exit(1);
-        } // end catch
-    } // end method closeFile
 
     // Get position of first record in file
     public long getFirst()
