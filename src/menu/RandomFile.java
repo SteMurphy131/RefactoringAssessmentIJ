@@ -2,10 +2,8 @@ package menu;
 
 import entity.*;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -76,7 +74,6 @@ public class RandomFile
     // Add records to file
     public long addRecords(Employee employeeToAdd)
     {
-        Employee newEmployee = employeeToAdd;
         long currentRecordStart = 0;
 
         // object to be written to file
@@ -84,9 +81,9 @@ public class RandomFile
 
         try // output values to file
         {
-            record = new RandomAccessEmployeeRecord(newEmployee.getEmployeeId(), newEmployee.getPps(),
-                    newEmployee.getSurname(), newEmployee.getFirstName(), newEmployee.getGender(),
-                    newEmployee.getDepartment(), newEmployee.getSalary(), newEmployee.getFullTime());
+            record = new RandomAccessEmployeeRecord(employeeToAdd.getEmployeeId(), employeeToAdd.getPps(),
+                    employeeToAdd.getSurname(), employeeToAdd.getFirstName(), employeeToAdd.getGender(),
+                    employeeToAdd.getDepartment(), employeeToAdd.getSalary(), employeeToAdd.getFullTime());
 
             output.seek(output.length());// Look for proper position
             record.write(output);// Write object to file
@@ -108,17 +105,15 @@ public class RandomFile
     // Change details for existing object
     public void changeRecords(Employee newDetails, long byteToStart)
     {
-        long currentRecordStart = byteToStart;
         // object to be written to file
         RandomAccessEmployeeRecord record;
-        Employee oldDetails = newDetails;
         try // output values to file
         {
-            record = new RandomAccessEmployeeRecord(oldDetails.getEmployeeId(), oldDetails.getPps(),
-                    oldDetails.getSurname(), oldDetails.getFirstName(), oldDetails.getGender(),
-                    oldDetails.getDepartment(), oldDetails.getSalary(), oldDetails.getFullTime());
+            record = new RandomAccessEmployeeRecord(newDetails.getEmployeeId(), newDetails.getPps(),
+                    newDetails.getSurname(), newDetails.getFirstName(), newDetails.getGender(),
+                    newDetails.getDepartment(), newDetails.getSalary(), newDetails.getFullTime());
 
-            output.seek(currentRecordStart);// Look for proper position
+            output.seek(byteToStart);// Look for proper position
             record.write(output);// Write object to file
         } // end try
         catch (IOException ioException)
@@ -130,16 +125,13 @@ public class RandomFile
     // Delete existing object
     public void deleteRecords(long byteToStart)
     {
-        long currentRecordStart = byteToStart;
-
         // object to be written to file
         RandomAccessEmployeeRecord record;
-        ;
 
         try // output values to file
         {
             record = new RandomAccessEmployeeRecord();// Create empty object
-            output.seek(currentRecordStart);// Look for proper position
+            output.seek(byteToStart);// Look for proper position
             record.write(output);// Replace existing object with empty object
         } // end try
         catch (IOException ioException)
@@ -249,7 +241,7 @@ public class RandomFile
     // Get object from file in specified position
     public Employee readRecords(long byteToStart)
     {
-        Employee thisEmp = null;
+        Employee thisEmp;
         RandomAccessEmployeeRecord record = new RandomAccessEmployeeRecord();
 
         try
@@ -270,7 +262,6 @@ public class RandomFile
     {
         RandomAccessEmployeeRecord record = new RandomAccessEmployeeRecord();
         boolean ppsExist = false;
-        long oldByteStart = currentByteStart;
         long currentByte = 0;
 
         try
@@ -280,7 +271,7 @@ public class RandomFile
             while (currentByte != input.length() && !ppsExist)
             {
                 //if PPS Number is in position of current object - skip comparison
-                if (currentByte != oldByteStart)
+                if (currentByte != currentByteStart)
                 {
                     input.seek(currentByte);// Look for proper position in file
                     record.read(input);// Get record from file

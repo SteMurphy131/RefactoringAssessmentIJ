@@ -247,16 +247,16 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         empDetails.add(firstNameField = new JTextField(20), "growx, pushx, wrap");
 
         empDetails.add(new JLabel("Gender:"), "growx, pushx");
-        empDetails.add(genderCombo = new JComboBox<String>(gender), "growx, pushx, wrap");
+        empDetails.add(genderCombo = new JComboBox<>(gender), "growx, pushx, wrap");
 
         empDetails.add(new JLabel("Department:"), "growx, pushx");
-        empDetails.add(departmentCombo = new JComboBox<String>(department), "growx, pushx, wrap");
+        empDetails.add(departmentCombo = new JComboBox<>(department), "growx, pushx, wrap");
 
         empDetails.add(new JLabel("Salary:"), "growx, pushx");
         empDetails.add(salaryField = new JTextField(20), "growx, pushx, wrap");
 
         empDetails.add(new JLabel("Full Time:"), "growx, pushx");
-        empDetails.add(fullTimeCombo = new JComboBox<String>(fullTime), "growx, pushx, wrap");
+        empDetails.add(fullTimeCombo = new JComboBox<>(fullTime), "growx, pushx, wrap");
 
         buttonPanel.add(saveChange = new JButton("Save"));
         saveChange.addActionListener(this);
@@ -342,7 +342,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
             departmentCombo.setSelectedIndex(countDep);
             salaryField.setText(format.format(thisEmployee.getSalary()));
             // set corresponding full time combo box value to current employee
-            if (thisEmployee.getFullTime() == true)
+            if (thisEmployee.getFullTime())
                 fullTimeCombo.setSelectedIndex(1);
             else
                 fullTimeCombo.setSelectedIndex(2);
@@ -628,7 +628,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     private Vector<Object> getAllEmloyees()
     {
         // vector of Employee objects
-        Vector<Object> allEmployee = new Vector<Object>();
+        Vector<Object> allEmployee = new Vector<>();
         Vector<Object> empDetails;// vector of each employee details
         long byteStart = currentByteStart;
         int firstId;
@@ -638,15 +638,15 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         // loop until all Employees are added to vector
         do
         {
-            empDetails = new Vector<Object>();
-            empDetails.addElement(new Integer(currentEmployee.getEmployeeId()));
+            empDetails = new Vector<>();
+            empDetails.addElement(currentEmployee.getEmployeeId());
             empDetails.addElement(currentEmployee.getPps());
             empDetails.addElement(currentEmployee.getSurname());
             empDetails.addElement(currentEmployee.getFirstName());
-            empDetails.addElement(new Character(currentEmployee.getGender()));
+            empDetails.addElement(currentEmployee.getGender());
             empDetails.addElement(currentEmployee.getDepartment());
-            empDetails.addElement(new Double(currentEmployee.getSalary()));
-            empDetails.addElement(new Boolean(currentEmployee.getFullTime()));
+            empDetails.addElement(currentEmployee.getSalary());
+            empDetails.addElement(currentEmployee.getFullTime());
 
             allEmployee.addElement(empDetails);
             nextRecord();// look for next record
@@ -679,7 +679,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     // check if any of records in file is active - ID is not 0
     private boolean isSomeoneToDisplay()
     {
-        boolean someoneToDisplay = false;
+        boolean someoneToDisplay;
         // open file for reading
         application.openReadFile(file.getAbsolutePath());
         // check if any of records in file is active - ID is not 0
@@ -705,7 +705,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     // check for correct PPS format and look if PPS already in use
     public boolean correctPps(String pps, long currentByte)
     {
-        boolean ppsExist = false;
+        boolean ppsExist;
         // check for correct PPS format based on assignment description
         if (pps.length() == 8 || pps.length() == 9)
         {
@@ -722,7 +722,9 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
                 application.closeReadFile();// close file for reading
             } // end if
             else
+            {
                 ppsExist = true;
+            }
         } // end if
         else
             ppsExist = true;
@@ -848,11 +850,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     // enable text fields for editing
     public void setEnabled(boolean booleanValue)
     {
-        boolean search;
-        if (booleanValue)
-            search = false;
-        else
-            search = true;
+        boolean search = !booleanValue;
         ppsField.setEditable(booleanValue);
         surnameField.setEditable(booleanValue);
         firstNameField.setEditable(booleanValue);
@@ -1066,8 +1064,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
             int index = (int) (rnd.nextFloat() * fileNameChars.length());
             fileName.append(fileNameChars.charAt(index));
         }
-        String generatedfileName = fileName.toString();
-        return generatedfileName;
+        return fileName.toString();
     }// end getFileName
 
     // create file with generated file name when application is opened
