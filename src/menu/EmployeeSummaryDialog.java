@@ -67,7 +67,7 @@ public class EmployeeSummaryDialog extends JDialog implements ActionListener
         for (int i = 0; i < headerName.length; i++)
         {
             header.addElement(headerName[i]);
-        }// end for
+        }
         // construnct table and choose table model for each column
         tableModel = new DefaultTableModel(this.allEmployees, header)
         {
@@ -94,7 +94,7 @@ public class EmployeeSummaryDialog extends JDialog implements ActionListener
         for (int i = 0; i < employeeTable.getColumnCount(); i++)
         {
             employeeTable.getColumn(headerName[i]).setMinWidth(colWidth[i]);
-        }// end for
+        }
         // set alignments
         employeeTable.getColumnModel().getColumn(0).setCellRenderer(leftRenderer);
         employeeTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer);
@@ -114,7 +114,7 @@ public class EmployeeSummaryDialog extends JDialog implements ActionListener
         scrollPane.setBorder(BorderFactory.createTitledBorder("Employee Details"));
 
         return summaryDialog;
-    }// end summaryPane
+    }
 
     public void actionPerformed(ActionEvent e)
     {
@@ -140,6 +140,6 @@ public class EmployeeSummaryDialog extends JDialog implements ActionListener
             value = format.format(value);
 
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        }// end getTableCellRendererComponent
-    }// DefaultTableCellRenderer
-}// end class EmployeeSummaryDialog
+        }
+    }
+}

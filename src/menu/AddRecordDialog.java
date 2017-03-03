@@ -25,7 +25,7 @@ public class AddRecordDialog extends JDialog implements ActionListener
     JComboBox<String> genderCombo, departmentCombo, fullTimeCombo;
     JButton save, cancel;
     EmployeeDetails parent;
-    // constructor for add record dialog
+
     public AddRecordDialog(EmployeeDetails parent)
     {
         setTitle("Add Record");
@@ -42,7 +42,7 @@ public class AddRecordDialog extends JDialog implements ActionListener
         setSize(500, 370);
         setLocation(350, 250);
         setVisible(true);
-    }// end AddRecordDialog
+    }
 
     // initialize dialog container
     public Container dialogPane()

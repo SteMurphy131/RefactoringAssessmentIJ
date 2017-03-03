@@ -14,13 +14,7 @@ class JTextFieldLimit extends PlainDocument
     {
         super();
         this.limit = limit;
-    }// end JTextFieldLimit
-
-    JTextFieldLimit(int limit, boolean upper)
-    {
-        super();
-        this.limit = limit;
-    }// end JTextFieldLimit
+    }
 
     public void insertString(int offset, String str, AttributeSet attr) throws BadLocationException
     {
@@ -31,5 +25,5 @@ class JTextFieldLimit extends PlainDocument
             super.insertString(offset, str, attr);
         else
             JOptionPane.showMessageDialog(null, "For input " + limit + " characters maximum!");
-    }// end insertString
-}// end class JTextFieldLimits
+    }
+}
