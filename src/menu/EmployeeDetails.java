@@ -2,11 +2,7 @@ package menu;
 
 import entity.*;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -19,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.DecimalFormat;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -51,13 +46,9 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     private static final DecimalFormat format = new DecimalFormat("\u20ac ###,###,##0.00");
     // decimal format for active currency text field
     private static final DecimalFormat fieldFormat = new DecimalFormat("0.00");
-    // hold object start position in file
-    private long currentByteStart = 0;
-    private RandomFile application = new RandomFile();
     // display files in File Chooser only with extension .dat
     private FileNameExtensionFilter datfilter = new FileNameExtensionFilter("dat files (*.dat)", "dat");
     // hold file name and path for current file in use
-    private File file;
     // holds true or false if any changes are made for text fields
     private boolean change = false;
     // holds true or false if any changes are made for file content
@@ -81,7 +72,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     // full time combo box values
     String[] fullTime = { "", "Yes", "No" };
 
-    private EmployeeController controller = new EmployeeController();
+    Controller controller = new Controller();
 
     // initialize menu bar
     private JMenuBar menuBar()
@@ -103,22 +94,19 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         menuBar.add(navigateMenu);
         menuBar.add(closeMenu);
 
-        fileMenu.add(open = new JMenuItem("Open")).addActionListener(this);
-        open.setMnemonic(KeyEvent.VK_O);
-        open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-        fileMenu.add(save = new JMenuItem("Save")).addActionListener(this);
-        save.setMnemonic(KeyEvent.VK_S);
-        save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-        fileMenu.add(saveAs = new JMenuItem("Save As")).addActionListener(this);
-        saveAs.setMnemonic(KeyEvent.VK_F2);
-        saveAs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, ActionEvent.CTRL_MASK));
+        open = Extensions.createMenuItemWithMnemonicAndAccelerator("Open", KeyEvent.VK_0, ActionEvent.CTRL_MASK);
+        save = Extensions.createMenuItemWithMnemonicAndAccelerator("Save", KeyEvent.VK_S, ActionEvent.CTRL_MASK);
+        saveAs = Extensions.createMenuItemWithMnemonicAndAccelerator("Save As", KeyEvent.VK_F2, ActionEvent.CTRL_MASK);
 
-        recordMenu.add(create = new JMenuItem("Create new Record")).addActionListener(this);
-        create.setMnemonic(KeyEvent.VK_N);
-        create.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        recordMenu.add(modify = new JMenuItem("Modify Record")).addActionListener(this);
-        modify.setMnemonic(KeyEvent.VK_E);
-        modify.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.CTRL_MASK));
+        fileMenu.add(open).addActionListener(this);
+        fileMenu.add(save).addActionListener(this);
+        fileMenu.add(saveAs).addActionListener(this);
+
+        create = Extensions.createMenuItemWithMnemonicAndAccelerator("Create new Record", KeyEvent.VK_N, ActionEvent.CTRL_MASK);
+        modify = Extensions.createMenuItemWithMnemonicAndAccelerator("Modify Record", KeyEvent.VK_E, ActionEvent.CTRL_MASK);
+
+        recordMenu.add(create).addActionListener(this);
+        recordMenu.add(modify).addActionListener(this);
         recordMenu.add(delete = new JMenuItem("Delete Record")).addActionListener(this);
 
         navigateMenu.add(firstItem = new JMenuItem("First"));
@@ -177,49 +165,33 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         JPanel navigPanel = new JPanel();
 
         navigPanel.setBorder(BorderFactory.createTitledBorder("Navigate"));
-        navigPanel.add(first = new JButton(new ImageIcon(
-                new ImageIcon("first.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-        first.setPreferredSize(new Dimension(17, 17));
-        first.addActionListener(this);
-        first.setToolTipText("Display first Record");
 
-        navigPanel.add(previous = new JButton(new ImageIcon(new ImageIcon("previous.png").getImage()
-                .getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-        previous.setPreferredSize(new Dimension(17, 17));
-        previous.addActionListener(this);
-        previous.setToolTipText("Display next Record");
+        first = Extensions.createJButtonWithImageAndOther("first.png", "Display first Record", this);
+        previous = Extensions.createJButtonWithImageAndOther("previous.png", "Display previous Record", this);
+        next = Extensions.createJButtonWithImageAndOther("next.png", "Display next Record", this);
+        last = Extensions.createJButtonWithImageAndOther("last.png", "Display last Record", this);
 
-        navigPanel.add(next = new JButton(new ImageIcon(
-                new ImageIcon("next.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-        next.setPreferredSize(new Dimension(17, 17));
-        next.addActionListener(this);
-        next.setToolTipText("Display previous Record");
-
-        navigPanel.add(last = new JButton(new ImageIcon(
-                new ImageIcon("last.png").getImage().getScaledInstance(17, 17, java.awt.Image.SCALE_SMOOTH))));
-        last.setPreferredSize(new Dimension(17, 17));
-        last.addActionListener(this);
-        last.setToolTipText("Display last Record");
+        navigPanel.add(first);
+        navigPanel.add(previous);
+        navigPanel.add(next);
+        navigPanel.add(last);
 
         return navigPanel;
-    }// end naviPanel
+    }
 
     private JPanel buttonPanel()
     {
         JPanel buttonPanel = new JPanel();
 
-        buttonPanel.add(add = new JButton("Add Record"), "growx, pushx");
-        add.addActionListener(this);
-        add.setToolTipText("Add new Employee Record");
-        buttonPanel.add(edit = new JButton("Edit Record"), "growx, pushx");
-        edit.addActionListener(this);
-        edit.setToolTipText("Edit current Employee");
-        buttonPanel.add(deleteButton = new JButton("Delete Record"), "growx, pushx, wrap");
-        deleteButton.addActionListener(this);
-        deleteButton.setToolTipText("Delete current Employee");
-        buttonPanel.add(displayAll = new JButton("List all Records"), "growx, pushx");
-        displayAll.addActionListener(this);
-        displayAll.setToolTipText("List all Registered Employees");
+        add = Extensions.createJButtonWithActionListenerAndToolTip("Add Record", "Add new Employee Record", this);
+        edit = Extensions.createJButtonWithActionListenerAndToolTip("Edit Record", "Edit current Employee", this);
+        deleteButton = Extensions.createJButtonWithActionListenerAndToolTip("Delete Record", "Delete current Employee", this);
+        displayAll = Extensions.createJButtonWithActionListenerAndToolTip("List all Records", "List all Registered Employees", this);
+
+        buttonPanel.add(add, "growx, pushx");
+        buttonPanel.add(edit, "growx, pushx");
+        buttonPanel.add(deleteButton, "growx, pushx, wrap");
+        buttonPanel.add(displayAll, "growx, pushx");
 
         return buttonPanel;
     }
@@ -302,6 +274,27 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         return empDetails;
     }// end detailsPanel
 
+    // content pane for main dialog
+    private void createContentPane()
+    {
+        setTitle("Employee Details");
+        JPanel dialog = new JPanel(new MigLayout());
+
+        setJMenuBar(menuBar());// add menu bar to frame
+        // add search panel to frame
+        dialog.add(searchPanel(), "width 400:400:400, growx, pushx");
+        // add navigation panel to frame
+        dialog.add(navigPanel(), "width 150:150:150, wrap");
+        // add button panel to frame
+        dialog.add(buttonPanel(), "growx, pushx, span 2,wrap");
+        // add details panel to frame
+        dialog.add(detailsPanel(), "gap top 30, gap left 150, center");
+
+        JScrollPane scrollPane = new JScrollPane(dialog);
+        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        addWindowListener(this);
+    }// end createContentPane
+
     public Employee getCurrentEmployee()
     {
         try
@@ -365,7 +358,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     {
         // display Employee summary dialog if these is someone to display
         if (isSomeoneToDisplay())
-            new EmployeeSummaryDialog(getAllEmployees());
+            new EmployeeSummaryDialog(controller.getAllEmployees());
     }// end displaySummaryDialog
 
     // display search by ID dialog
@@ -381,45 +374,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         if (isSomeoneToDisplay())
             new SearchBySurnameDialog(EmployeeDetails.this);
     }// end displaySearchBySurnameDialog
-
-    // find byte start in file for first active record
-    // go to first record
-    private void firstRecord()
-    {
-        if (isSomeoneToDisplay())
-        {
-            displayRecords(controller.getFirstEmployee());
-        }
-    }
-
-    // find byte start in file for previous active record
-    // go to previous record
-    private void previousRecord()
-    {
-        if (isSomeoneToDisplay())
-        {
-            displayRecords(controller.getPreviousEmployee());
-        }
-    }
-
-    // find byte start in file for next active record
-    private void nextRecord()
-    {
-        if (isSomeoneToDisplay())
-        {
-            displayRecords(controller.getNextEmployee());
-        }
-    }
-
-    // find byte start in file for last active record
-    private void lastRecord()
-    {
-        // if any active record in file look for first record
-        if (isSomeoneToDisplay())
-        {
-            displayRecords(controller.getLastEmployee());
-        } // end if
-    }// end lastRecord
 
     public void searchEmployeeById()
     {
@@ -441,17 +395,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
 
         searchByIdField.setBackground(Color.WHITE);
         searchByIdField.setText("");
-    }
-
-    public void searchEmployeeBySurname()
-    {
-        String name = searchBySurnameField.getText().trim();
-        Employee emp = controller.searchEmployeeBySurname(name);
-
-        if(emp == null)
-            JOptionPane.showMessageDialog(null, "Employee not found!");
-        else
-            displayRecords(emp);
     }
 
     // get next free ID from Employees in the file
@@ -485,12 +428,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         return theEmployee;
     }// end getChangedDetails
 
-    // add Employee object to fail
-    public void addRecord(Employee newEmployee)
-    {
-        controller.saveRecord(newEmployee);
-    }// end addRecord
-
     // delete (make inactive - empty) record from file
     private void deleteRecord()
     {
@@ -502,24 +439,14 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
             // if answer yes delete (make inactive - empty) record
             if (returnVal == JOptionPane.YES_OPTION)
             {
-                // open file for writing
-                application.openWriteFile(controller.file.getAbsolutePath());
-                // delete (make inactive - empty) record in file proper position
-                application.deleteRecords(currentByteStart);
-                application.closeFile(application.output);// close file for writing
-                // if any active record in file display next record
+                controller.deleteRecord();
+
                 if (isSomeoneToDisplay())
                 {
                     displayRecords(controller.getNextEmployee());
                 }
             }
         }
-    }
-
-    // create vector of vectors with all Employee details
-    private Vector<Object> getAllEmployees()
-    {
-        return controller.getAllEmployees();
     }
 
     // activate field for editing
@@ -551,50 +478,20 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
             clearFields();
 
         return someoneToDisplay;
-    }// end isSomeoneToDisplay
+    }
 
     // check for correct PPS format and look if PPS already in use
     public boolean correctPps(String pps, long currentByte)
     {
-        boolean ppsExist;
-        // check for correct PPS format based on assignment description
-        if (pps.length() == 8 || pps.length() == 9)
+        boolean ppsExist = false;
+
+        if (Extensions.ppsValidity(pps))
         {
-            if (Character.isDigit(pps.charAt(0)) && Character.isDigit(pps.charAt(1))
-                    && Character.isDigit(pps.charAt(2))	&& Character.isDigit(pps.charAt(3))
-                    && Character.isDigit(pps.charAt(4))	&& Character.isDigit(pps.charAt(5))
-                    && Character.isDigit(pps.charAt(6))	&& Character.isLetter(pps.charAt(7))
-                    && (pps.length() == 8 || Character.isLetter(pps.charAt(8))))
-            {
-                // open file for reading
-                application.openReadFile(controller.file.getAbsolutePath());
-                // look in file is PPS already in use
-                ppsExist = application.isPpsExist(pps, currentByte);
-                application.closeFile(application.input);// close file for reading
-            } // end if
-            else
-            {
-                ppsExist = true;
-            }
-        } // end if
-        else
-            ppsExist = true;
+            ppsExist = controller.ppsInUse(pps, currentByte);
+        }
 
         return ppsExist;
-    }// end correctPPS
-
-    // check if file name has extension .dat
-    private boolean checkFileName(File fileName)
-    {
-        boolean checkFile = false;
-        int length = fileName.toString().length();
-
-        // check if last characters in file name is .dat
-        if (fileName.toString().charAt(length - 4) == '.' && fileName.toString().charAt(length - 3) == 'd'
-                && fileName.toString().charAt(length - 2) == 'a' && fileName.toString().charAt(length - 1) == 't')
-            checkFile = true;
-        return checkFile;
-    }// end checkFileName
+    }
 
     // check if any changes text field where made
     private boolean checkForChanges()
@@ -628,7 +525,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
             ppsField.setBackground(new Color(255, 150, 150));
             valid = false;
         } // end if
-        if (ppsField.isEditable() && correctPps(ppsField.getText().trim(), currentByteStart))
+        if (ppsField.isEditable() && correctPps(ppsField.getText().trim(), controller.currentByteStart))
         {
             ppsField.setBackground(new Color(255, 150, 150));
             valid = false;
@@ -717,44 +614,33 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         searchSurname.setEnabled(search);
     }// end setEnabled
 
-    // open file
-    private void openFile()
+    public void openFile()
     {
         final JFileChooser fc = new JFileChooser();
         fc.setDialogTitle("Open");
-        // display files in File Chooser only with extension .dat
         fc.setFileFilter(datfilter);
-        File newFile; // holds opened file name and path
-        // if old file is not empty or changes has been made, offer user to save
-        // old file
+        File newFile;
         if (controller.file.length() != 0 || change)
         {
             int returnVal = JOptionPane.showOptionDialog(frame, "Do you want to save changes?", "Save",
                     JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, null, null);
-            // if user wants to save file, save it
             if (returnVal == JOptionPane.YES_OPTION)
             {
-                saveFile();// save file
-            } // end if
-        } // end if
+                saveFile();
+            }
+        }
 
         int returnVal = fc.showOpenDialog(EmployeeDetails.this);
-        // if file been chosen, open it
+
         if (returnVal == JFileChooser.APPROVE_OPTION)
         {
             newFile = fc.getSelectedFile();
-            // if old file wasn't saved and its name is generated file name,
-            // delete this file
+
             if (controller.file.getName().equals(generatedFileName))
-                controller.file.delete();// delete file
-            file = newFile;// assign opened file to file
-            // open file for reading
-            application.openReadFile(controller.file.getAbsolutePath());
-            firstRecord();// look for first record
-            displayRecords(getCurrentEmployee());
-            application.closeFile(application.input);// close file for reading
-        } // end if
-    }// end openFile
+                controller.file.delete();
+            controller.file = newFile;
+        }
+    }
 
     // save file
     private void saveFile()
@@ -778,13 +664,8 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
                     if (!idField.getText().equals(""))
                     {
                         // open file for writing
-                        application.openWriteFile(controller.file.getAbsolutePath());
-                        // get changes for current Employee
                         Employee emp = getChangedDetails();
-                        // write changes to file for corresponding Employee
-                        // record
-                        application.changeRecords(emp, currentByteStart);
-                        application.closeFile(application.output);// close file for writing
+                        controller.updateRecord(emp);
                     } // end if
                 } // end if
             } // end if
@@ -794,28 +675,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         } // end else
     }// end saveFile
 
-    // save changes to current Employee
-    private void saveChanges()
-    {
-        int returnVal = JOptionPane.showOptionDialog(frame, "Do you want to save changes to current Employee?", "Save",
-                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, null, null);
-        // if user choose to save changes, save changes
-        if (returnVal == JOptionPane.YES_OPTION)
-        {
-            // open file for writing
-            application.openWriteFile(controller.file.getAbsolutePath());
-            // get changes for current Employee
-            Employee emp = getChangedDetails();
-            // write changes to file for corresponding Employee record
-            application.changeRecords(emp, currentByteStart);
-            application.closeFile(application.output);// close file for writing
-            changesMade = false;// state that all changes has bee saved
-        } // end if
-        displayRecords(getCurrentEmployee());
-        setEnabled(false);
-    }// end saveChanges
-
-    // save file as 'save as'
     private void saveFileAs()
     {
         final JFileChooser fc = new JFileChooser();
@@ -833,16 +692,16 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         {
             newFile = fc.getSelectedFile();
             // check for file name
-            if (!checkFileName(newFile))
+            if (!Extensions.checkFileName(newFile))
             {
                 // add .dat extension if it was not there
                 newFile = new File(newFile.getAbsolutePath() + ".dat");
                 // create new file
-                application.createFile(newFile.getAbsolutePath());
+                controller.randomFile.createFile(newFile.getAbsolutePath());
             } // end id
             else
                 // create new file
-                application.createFile(newFile.getAbsolutePath());
+                controller.randomFile.createFile(newFile.getAbsolutePath());
 
             try
             {
@@ -858,6 +717,22 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         changesMade = false;
     }// end saveFileAs
 
+    // save changes to current Employee
+    private void saveChanges()
+    {
+        int returnVal = JOptionPane.showOptionDialog(frame, "Do you want to save changes to current Employee?", "Save",
+                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null, null, null);
+        // if user choose to save changes, save changes
+        if (returnVal == JOptionPane.YES_OPTION)
+        {
+            Employee emp = getChangedDetails();
+            controller.updateRecord(emp);
+            changesMade = false;// state that all changes has bee saved
+        } // end if
+        displayRecords(getCurrentEmployee());
+        setEnabled(false);
+    }// end saveChanges
+
     // allow to save changes to file when exiting the application
     private void exitApp()
     {
@@ -868,24 +743,21 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
             {
                 int returnVal = JOptionPane.showOptionDialog(frame, "Do you want to save changes?", "Save",
                         JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, null, null);
-                // if user chooses to save file, save file
+
                 if (returnVal == JOptionPane.YES_OPTION)
                 {
-                    saveFile();// save file
-                    // delete generated file if user saved details to other file
+                    saveFile();
                     if (controller.file.getName().equals(generatedFileName))
                         controller.file.delete();// delete file
-                    System.exit(0);// exit application
-                } // end if
-                // else exit application
+                    System.exit(0);
+                }
                 else if (returnVal == JOptionPane.NO_OPTION)
                 {
-                    // delete generated file if user chooses not to save file
                     if (controller.file.getName().equals(generatedFileName))
                         controller.file.delete();// delete file
-                    System.exit(0);// exit application
-                } // end else if
-            } // end if
+                    System.exit(0);
+                }
+            }
             else
             {
                 // delete generated file if user chooses not to save file
@@ -954,7 +826,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         else if (e.getSource() == searchId || e.getSource() == searchByIdField)
             searchEmployeeById();
         else if (e.getSource() == searchSurname || e.getSource() == searchBySurnameField)
-            searchEmployeeBySurname();
+            controller.searchEmployeeBySurname(searchBySurnameField.getText().trim());
         else if (e.getSource() == saveChange)
         {
             if (checkInput() && !checkForChanges())
@@ -1018,28 +890,7 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
         }
     }// end actionPerformed
 
-    // content pane for main dialog
-    private void createContentPane()
-    {
-        setTitle("Employee Details");
-        JPanel dialog = new JPanel(new MigLayout());
-
-        setJMenuBar(menuBar());// add menu bar to frame
-        // add search panel to frame
-        dialog.add(searchPanel(), "width 400:400:400, growx, pushx");
-        // add navigation panel to frame
-        dialog.add(navigPanel(), "width 150:150:150, wrap");
-        // add button panel to frame
-        dialog.add(buttonPanel(), "growx, pushx, span 2,wrap");
-        // add details panel to frame
-        dialog.add(detailsPanel(), "gap top 30, gap left 150, center");
-
-        JScrollPane scrollPane = new JScrollPane(dialog);
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
-        addWindowListener(this);
-    }// end createContentPane
-
-    // create and show main dialog
+        // create and show main dialog
     private static void createAndShowGUI()
     {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -1083,7 +934,6 @@ public class EmployeeDetails extends JFrame implements ActionListener, ItemListe
     // WindowsListener methods
     public void windowClosing(WindowEvent e)
     {
-        // exit application
         exitApp();
     }
 

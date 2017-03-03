@@ -121,7 +121,7 @@ public class AddRecordDialog extends JDialog implements ActionListener
                 firstNameField.getText().toUpperCase(), genderCombo.getSelectedItem().toString().charAt(0),
                 departmentCombo.getSelectedItem().toString(), Double.parseDouble(salaryField.getText()), fullTime);
 
-        this.parent.addRecord(theEmployee);
+        this.parent.controller.saveRecord(theEmployee);
         this.parent.displayRecords(theEmployee);
     }
 
